@@ -5,8 +5,8 @@
   (:import
    (java.io File)))
 
-;; see `resources/example.tla`, this is the position
-;; of the variables in the spec
+;; see `resources/example.tla`, these are the positions
+;; of the variables at the spec
 (def vars-keys
   [:c1 :c2 :account :sender :receiver :money :pc])
 
