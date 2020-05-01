@@ -14,16 +14,15 @@
 ;; can be used to override a operator (check its args to see the options)
 (spec/defop TransferMoney {:module "example"}
   "`vars` is used to get the state of the world (:money, :sender, :receiver)"
-  [self account vars]                   ; the operators arguments (check `resources/example.tla`)
+  [self vars]                   ; the operators arguments (check `resources/example.tla`)
   (let [self (tla-edn/to-edn self) ; `self` is a string indicating which process is calling this operator
         vars (zipmap vars-keys (tla-edn/to-edn vars))
         sender (get-in vars [:sender self])
         receiver (get-in vars [:receiver self])
         money (get-in vars [:money self])]
-    ;; here we convert the record `account` and
-    ;; transfer the money from `sender` to `receiver`
+    ;; here we transfer the money from `sender` to `receiver`
     ;; and then we convert it back to TLA values
-    (-> (tla-edn/to-edn account)
+    (-> (:account vars)
         (update sender - money)
         (update receiver + money)
         tla-edn/to-tla-value)))

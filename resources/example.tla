@@ -4,6 +4,7 @@
 (* We have the process `tx` which transfers an amount of `money` from `sender` *)
 (* to `receiver`.*)
 (* The possible clients are `c1` and `c2`. *)
+(* `account` keeps the balances (maybe it should be renamed `balance`) *)
 
 EXTENDS Integers, Sequences, TLC
 
@@ -17,18 +18,25 @@ Processes == {"t1", "t2"}
     sender = [self \in Processes |-> c1],
     receiver = [self \in Processes |-> c2],
     money \in [Processes -> 1..5];
+
     define {
+        (* Invariant to check correct balance *)
         ConstantBalance ==
         account["c1"] + account["c2"] = 20
-        TransferMoney(self, acc, vars) ==
+
+        (* Operator which is overriden by the TLA EDN operator. *)
+        (* `self` says which process is running. *)
+        (* `vars` is used only at the override operator, it contains the state of the specification. *)
+        TransferMoney(self, vars) ==
         [account EXCEPT
          ![sender[self]] = account[sender[self]] - money[self],
          ![receiver[self]] = account[receiver[self]] + money[self]]
     }
+
     fair process (tx \in Processes)
     {
         ADAPT: skip;
-        TRANSFER_MONEY: account := TransferMoney(self, account, vars);
+        TRANSFER_MONEY: account := TransferMoney(self, vars);
     }
 }*)
 
@@ -39,7 +47,7 @@ VARIABLES c1, c2, account, sender, receiver, money, pc
 ConstantBalance ==
 account["c1"] + account["c2"] = 20
 
-TransferMoney(self, acc, vars) ==
+TransferMoney(self, vars) ==
 [account EXCEPT
  ![sender[self]] = account[sender[self]] - money[self],
  ![receiver[self]] = account[receiver[self]] + money[self]]
@@ -64,7 +72,7 @@ ADAPT(self) == /\ pc[self] = "ADAPT"
                /\ UNCHANGED << c1, c2, account, sender, receiver, money >>
 
 TRANSFER_MONEY(self) == /\ pc[self] = "TRANSFER_MONEY"
-                        /\ account' = TransferMoney(self, account, vars)
+                        /\ account' = TransferMoney(self, vars)
                         /\ pc' = [pc EXCEPT ![self] = "Done"]
                         /\ UNCHANGED << c1, c2, sender, receiver, money >>
 
