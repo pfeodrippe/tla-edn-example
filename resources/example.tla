@@ -1,5 +1,10 @@
 -------------------------------- MODULE example --------------------------------
 
+(* This specifies a simple transaction between parts. *)
+(* We have the process `tx` which transfers an amount of `money` from `sender` *)
+(* to `receiver`.*)
+(* The possible clients are `c1` and `c2`. *)
+
 EXTENDS Integers, Sequences, TLC
 
 Processes == {"t1", "t2"}
@@ -9,8 +14,6 @@ Processes == {"t1", "t2"}
     c1 = "c1",
     c2 = "c2",
     account = [c \in {"c1", "c2"} |-> 10],
-    receiver_new_amount = [self \in Processes |-> 0],
-    sender_new_amount = [self \in Processes |-> 0],
     sender = [self \in Processes |-> c1],
     receiver = [self \in Processes |-> c2],
     money \in [Processes -> 1..5];
@@ -30,8 +33,7 @@ Processes == {"t1", "t2"}
 }*)
 
 \* BEGIN TRANSLATION
-VARIABLES c1, c2, account, receiver_new_amount, sender_new_amount, sender, 
-          receiver, money, pc
+VARIABLES c1, c2, account, sender, receiver, money, pc
 
 (* define statement *)
 ConstantBalance ==
@@ -43,8 +45,7 @@ TransferMoney(self, acc, vars) ==
  ![receiver[self]] = account[receiver[self]] + money[self]]
 
 
-vars == << c1, c2, account, receiver_new_amount, sender_new_amount, sender, 
-           receiver, money, pc >>
+vars == << c1, c2, account, sender, receiver, money, pc >>
 
 ProcSet == (Processes)
 
@@ -52,8 +53,6 @@ Init == (* Global variables *)
         /\ c1 = "c1"
         /\ c2 = "c2"
         /\ account = [c \in {"c1", "c2"} |-> 10]
-        /\ receiver_new_amount = [self \in Processes |-> 0]
-        /\ sender_new_amount = [self \in Processes |-> 0]
         /\ sender = [self \in Processes |-> c1]
         /\ receiver = [self \in Processes |-> c2]
         /\ money \in [Processes -> 1..5]
@@ -62,15 +61,12 @@ Init == (* Global variables *)
 ADAPT(self) == /\ pc[self] = "ADAPT"
                /\ TRUE
                /\ pc' = [pc EXCEPT ![self] = "TRANSFER_MONEY"]
-               /\ UNCHANGED << c1, c2, account, receiver_new_amount, 
-                               sender_new_amount, sender, receiver, money >>
+               /\ UNCHANGED << c1, c2, account, sender, receiver, money >>
 
 TRANSFER_MONEY(self) == /\ pc[self] = "TRANSFER_MONEY"
                         /\ account' = TransferMoney(self, account, vars)
                         /\ pc' = [pc EXCEPT ![self] = "Done"]
-                        /\ UNCHANGED << c1, c2, receiver_new_amount, 
-                                        sender_new_amount, sender, receiver, 
-                                        money >>
+                        /\ UNCHANGED << c1, c2, sender, receiver, money >>
 
 tx(self) == ADAPT(self) \/ TRANSFER_MONEY(self)
 

@@ -7,8 +7,7 @@
 
 ;; see `resources/example.tla`
 (def vars-keys
-  [:c1 :c2 :account :receiver-new-amount :sender-new-amount :sender
-   :receiver :money :pc])
+  [:c1 :c2 :account :sender :receiver :money :pc])
 
 ;; `defop` behaves like `defn`, but it generates a class which
 ;; can be used to override a operator (check its args to see the options)
