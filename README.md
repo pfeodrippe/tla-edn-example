@@ -8,8 +8,7 @@ We will run the [TLA spec](resources/example.tla) which just transfers money
 from one client to another and check some [invariants](resources/example.cfg).
 
 When running for the first time, it will compile the operator and create the
-`classes` folder, but not use the override operator (as it's not compiled yet
-and `classes/tlc/overrides/TLCOverrides.class` is not created).
+`classes` folder, but it does not override the operator.
 
 ```shell
 $ make run
@@ -20,7 +19,7 @@ $ make run
 
 ```
 
-Now running for the second time (or when `TLCOverrides.class` exists).
+Now running for the second time.
 
 ```shell
 $ make run
